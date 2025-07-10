@@ -124,7 +124,7 @@ export function SessionPage({ initialSession, initialParticipant }: SessionPageP
     [votesSubmitted, session.participants.length],
   )
   const myVote = useMemo(
-    () => session.participants.find((p) => p.id === participant?.id)?.vote,
+    () => session.participants.find((p) => p.id === participant?.id)?.vote ?? null,
     [session.participants, participant],
   )
 
@@ -177,7 +177,7 @@ export function SessionPage({ initialSession, initialParticipant }: SessionPageP
           <ParticipantList
             participants={session.participants}
             creatorId={session.creatorId}
-            currentParticipantId={participant?.id}
+            currentParticipantId={participant?.id ?? null}
             onRemove={handleRemoveParticipant}
             votesSubmitted={votesSubmitted}
           />
@@ -319,7 +319,7 @@ function ParticipantList({
                 <span className="font-medium">
                   {p.name} {p.id === currentParticipantId && "(You)"}
                 </span>
-                {p.id === creatorId && <Crown className="h-4 w-4 text-yellow-500" title="Session Creator" />}
+                {p.id === creatorId && <Crown className="h-4 w-4 text-yellow-500" />}
               </div>
               {currentParticipantId === creatorId && p.id !== creatorId && (
                 <Button variant="ghost" size="icon" onClick={() => onRemove(p.id)}>

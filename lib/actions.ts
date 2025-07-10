@@ -55,7 +55,7 @@ export async function joinSession(code: string, formData: FormData) {
   }
 
   await addParticipant(code, participant)
-  cookies().set(`participant-${code}`, participant.id, { httpOnly: true, path: `/` })
+  ;(await cookies()).set(`participant-${code}`, participant.id, { httpOnly: true, path: `/` })
 
   revalidatePath(`/session/${code}`)
   revalidatePath("/")
