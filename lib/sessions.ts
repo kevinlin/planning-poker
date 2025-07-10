@@ -1,12 +1,47 @@
 /**
- * In-memory session store.
- * This is a simple implementation for demonstration purposes.
+ * File-persisted session store for development.
+ * This implementation persists sessions to a local JSON file to prevent data loss on server restart.
  * In a real-world application, you would use a database or a distributed cache like Redis.
- * The data is ephemeral and will be lost on server restart.
  */
 import type { Session, Participant } from "./types"
+import { writeFileSync, readFileSync, existsSync } from "fs"
+import { join } from "path"
 
-const sessions = new Map<string, Session>()
+const SESSIONS_FILE = join(process.cwd(), '.sessions.json')
+
+// Load sessions from file on startup
+function loadSessions(): Map<string, Session> {
+  try {
+    if (existsSync(SESSIONS_FILE)) {
+      const data = readFileSync(SESSIONS_FILE, 'utf-8')
+      const sessionsArray = JSON.parse(data)
+      const sessions = new Map<string, Session>()
+      
+      // Convert date strings back to Date objects and restore the Map
+      sessionsArray.forEach(([code, session]: [string, any]) => {
+        session.createdAt = new Date(session.createdAt)
+        sessions.set(code, session)
+      })
+      
+      return sessions
+    }
+  } catch (error) {
+    console.warn('Failed to load sessions from file:', error)
+  }
+  return new Map<string, Session>()
+}
+
+// Save sessions to file
+function saveSessions(sessions: Map<string, Session>): void {
+  try {
+    const sessionsArray = Array.from(sessions.entries())
+    writeFileSync(SESSIONS_FILE, JSON.stringify(sessionsArray, null, 2))
+  } catch (error) {
+    console.warn('Failed to save sessions to file:', error)
+  }
+}
+
+const sessions = loadSessions()
 
 function generateShortCode(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -39,6 +74,7 @@ export async function createSession(data: { title: string; jiraKey: string }): P
     finalVote: null,
   }
   sessions.set(code, session)
+  saveSessions(sessions)
   return session
 }
 
@@ -65,6 +101,7 @@ export async function addParticipant(code: string, participant: Participant): Pr
   const session = sessions.get(code)
   if (session) {
     session.participants.push(participant)
+    saveSessions(sessions)
   } else {
     throw new Error("Session not found")
   }
@@ -82,6 +119,7 @@ export async function updateParticipantVote(code: string, participantId: string,
     if (participant) {
       participant.vote = vote
       participant.lastActive = Date.now()
+      saveSessions(sessions)
     } else {
       throw new Error("Participant not found")
     }
@@ -95,6 +133,7 @@ export async function finalizeSessionVote(code: string, vote: number): Promise<v
   if (session) {
     session.status = "closed"
     session.finalVote = vote
+    saveSessions(sessions)
   } else {
     throw new Error("Session not found")
   }
@@ -104,6 +143,7 @@ export async function resetSessionVoting(code: string): Promise<void> {
   const session = sessions.get(code)
   if (session) {
     session.participants.forEach((p) => (p.vote = null))
+    saveSessions(sessions)
   } else {
     throw new Error("Session not found")
   }
@@ -113,6 +153,7 @@ export async function removeParticipantFromSession(code: string, participantId: 
   const session = sessions.get(code)
   if (session) {
     session.participants = session.participants.filter((p) => p.id !== participantId)
+    saveSessions(sessions)
   } else {
     throw new Error("Session not found")
   }

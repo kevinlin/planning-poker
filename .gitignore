@@ -28,3 +28,6 @@ next-env.d.ts
 
 # Cursor IDE
 .history/
+
+# Development session storage
+.sessions.json
