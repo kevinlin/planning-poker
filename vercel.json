@@ -6,5 +6,6 @@
   },
   "env": {
     "DATA_DIR": "/tmp/data"
-  }
+  },
+  "public": true
 } 
