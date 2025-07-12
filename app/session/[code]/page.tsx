@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,10 +15,11 @@ import { isParticipantActive } from '@/lib/utils';
 import { ArrowLeft, Eye, RotateCcw, Check, Copy } from 'lucide-react';
 
 interface SessionPageProps {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }
 
 export default function SessionPage({ params }: SessionPageProps) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
@@ -34,7 +35,7 @@ export default function SessionPage({ params }: SessionPageProps) {
     // Poll for updates every 2 seconds
     const interval = setInterval(fetchSession, 2000);
     return () => clearInterval(interval);
-  }, [params.code]);
+  }, [resolvedParams.code]);
 
   useEffect(() => {
     // Update participant activity every 10 seconds
@@ -48,7 +49,7 @@ export default function SessionPage({ params }: SessionPageProps) {
 
   const fetchSession = async () => {
     try {
-      const response = await fetch(`/api/sessions/${params.code}`);
+      const response = await fetch(`/api/sessions/${resolvedParams.code}`);
       if (response.ok) {
         const data = await response.json();
         setSession(data);
@@ -83,7 +84,7 @@ export default function SessionPage({ params }: SessionPageProps) {
     setError('');
 
     try {
-      const response = await fetch(`/api/sessions/${params.code}/join`, {
+      const response = await fetch(`/api/sessions/${resolvedParams.code}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ export default function SessionPage({ params }: SessionPageProps) {
     setSelectedVote(value);
 
     try {
-      const response = await fetch(`/api/sessions/${params.code}/vote`, {
+      const response = await fetch(`/api/sessions/${resolvedParams.code}/vote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +147,7 @@ export default function SessionPage({ params }: SessionPageProps) {
 
   const performAction = async (action: string, data?: any) => {
     try {
-      const response = await fetch(`/api/sessions/${params.code}/actions`, {
+      const response = await fetch(`/api/sessions/${resolvedParams.code}/actions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ export default function SessionPage({ params }: SessionPageProps) {
     if (!currentParticipant) return;
     
     try {
-      await fetch(`/api/sessions/${params.code}/actions`, {
+      await fetch(`/api/sessions/${resolvedParams.code}/actions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +192,7 @@ export default function SessionPage({ params }: SessionPageProps) {
 
   const copySessionCode = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(params.code);
+      navigator.clipboard.writeText(resolvedParams.code);
     }
   };
 
