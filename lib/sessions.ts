@@ -284,7 +284,7 @@ export class SessionManager {
     persistentStorage.saveSession(session);
   }
 
-  private static deleteSession(code: string): void {
+  static deleteSession(code: string): void {
     persistentStorage.deleteSession(code);
     console.log(`Deleted session ${code}`);
   }

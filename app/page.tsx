@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ClientOnly } from '@/components/client-only';
 import { SessionSummary } from '@/lib/types';
 import { formatTimeAgo } from '@/lib/utils';
-import { Plus, Copy, ExternalLink } from 'lucide-react';
+import { Plus, Copy, ExternalLink, Trash2 } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -21,6 +21,7 @@ export default function HomePage() {
   const [jiraKey, setJiraKey] = useState('');
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
+  const [deletingSession, setDeletingSession] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSessions();
@@ -84,6 +85,29 @@ export default function HomePage() {
     if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(code);
       // You could add a toast notification here
+    }
+  };
+
+  const deleteSession = async (code: string) => {
+    setDeletingSession(code);
+    
+    try {
+      const response = await fetch(`/api/sessions/${code}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Remove the session from the local state
+        setSessions(sessions.filter(s => s.code !== code));
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to delete session');
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      setError('Failed to delete session');
+    } finally {
+      setDeletingSession(null);
     }
   };
 
@@ -236,6 +260,15 @@ export default function HomePage() {
                           <ExternalLink className="h-4 w-4 mr-1" />
                           Join
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => deleteSession(session.code)}
+                          disabled={deletingSession === session.code}
+                          className="text-red-500 hover:text-red-700 hover:border-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -300,6 +333,15 @@ export default function HomePage() {
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
                           View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => deleteSession(session.code)}
+                          disabled={deletingSession === session.code}
+                          className="text-red-500 hover:text-red-700 hover:border-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
