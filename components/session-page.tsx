@@ -73,6 +73,14 @@ export function SessionPage({ initialSession, initialParticipant }: SessionPageP
   }
 
   const handleFinalize = async (vote: number) => {
+    if (participant?.id !== session.creatorId) {
+      toast({
+        title: "Permission Denied",
+        description: "Only the session creator can finalize votes.",
+        variant: "destructive",
+      })
+      return
+    }
     const result = await finalizeVote(session.code, vote)
     if (result.error) {
       toast({ title: "Error", description: result.error, variant: "destructive" })
@@ -83,6 +91,14 @@ export function SessionPage({ initialSession, initialParticipant }: SessionPageP
   }
 
   const handleRevote = async () => {
+    if (participant?.id !== session.creatorId) {
+      toast({
+        title: "Permission Denied",
+        description: "Only the session creator can start a new round.",
+        variant: "destructive",
+      })
+      return
+    }
     const result = await resetVoting(session.code)
     if (result.error) {
       toast({ title: "Error", description: result.error, variant: "destructive" })
@@ -166,7 +182,12 @@ export function SessionPage({ initialSession, initialParticipant }: SessionPageP
             </CardHeader>
             <CardContent>
               {allVotesIn ? (
-                <ResultsView session={session} onFinalize={handleFinalize} onRevote={handleRevote} />
+                <ResultsView 
+                  session={session} 
+                  onFinalize={handleFinalize} 
+                  onRevote={handleRevote}
+                  currentParticipantId={participant?.id ?? null}
+                />
               ) : (
                 <VotingView myVote={myVote} onVote={handleVote} />
               )}
@@ -230,7 +251,13 @@ function ResultsView({
   session,
   onFinalize,
   onRevote,
-}: { session: Session; onFinalize: (vote: number) => void; onRevote: () => void }) {
+  currentParticipantId,
+}: { 
+  session: Session; 
+  onFinalize: (vote: number) => void; 
+  onRevote: () => void;
+  currentParticipantId: string | null;
+}) {
   const votes = session.participants.map((p) => p.vote).filter((v): v is number => v !== null)
   const voteCounts = votes.reduce(
     (acc, vote) => {
@@ -244,6 +271,7 @@ function ResultsView({
   const minVote = Math.min(...votes)
   const maxVote = Math.max(...votes)
   const majorityVote = sortedVotes.length > 0 && sortedVotes[0][1] > votes.length / 2 ? Number(sortedVotes[0][0]) : null
+  const isCreator = currentParticipantId === session.creatorId
 
   return (
     <div className="text-center">
@@ -267,14 +295,18 @@ function ResultsView({
           </p>
         )}
         {majorityVote && <p className="text-green-600 font-semibold">Majority vote is {majorityVote}.</p>}
-        <div className="flex justify-center gap-4">
-          <Button onClick={onRevote}>Revote</Button>
-          <Button
-            onClick={() => onFinalize(majorityVote || Math.round(votes.reduce((a, b) => a + b, 0) / votes.length))}
-          >
-            Finalize Vote
-          </Button>
-        </div>
+        {isCreator ? (
+          <div className="flex justify-center gap-4">
+            <Button onClick={onRevote}>Revote</Button>
+            <Button
+              onClick={() => onFinalize(majorityVote || Math.round(votes.reduce((a, b) => a + b, 0) / votes.length))}
+            >
+              Finalize Vote
+            </Button>
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">Only the session creator can finalize or restart voting.</p>
+        )}
       </div>
     </div>
   )

@@ -31,7 +31,7 @@ export default function RootLayout({
         <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
         <footer className="bg-footer text-white py-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-            &copy; {new Date().getFullYear()} Poker Estimation App. All rights reserved.
+            &copy; 2025 Poker Estimation App. All rights reserved.
           </div>
         </footer>
         <Toaster />
