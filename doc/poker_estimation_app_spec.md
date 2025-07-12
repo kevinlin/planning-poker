@@ -1,4 +1,4 @@
-# Poker Estimation Web App – Developer Specification
+# Planning Poker Web App – Developer Specification
 
 ## 📌 Purpose
 A lightweight, real-time web app for story estimation using poker-style voting. Each session is tied to a single JIRA story and is shareable via a unique short code. It is primarily designed for Zühlke teams but open to anyone with the link.

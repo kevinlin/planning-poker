@@ -7,7 +7,7 @@ import ReactPlugin from "@stagewise-plugins/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Poker Estimation - Zühlke",
+  title: "Planning Poker",
   description: "Real-time story estimation using poker-style voting",
   icons: {
     icon: "/favicon.svg",
@@ -30,10 +30,10 @@ export default function RootLayout({
                 <div className="flex items-center">
                   <img
                     src="/logo.svg"
-                    alt="Poker Estimation Logo"
+                    alt="Planning Poker Logo"
                     className="h-8 mr-3"
                   />
-                  <h1 className="text-xl font-bold">Poker Estimation</h1>
+                  <h1 className="text-xl font-bold">Planning Poker</h1>
                 </div>
                 <div className="text-sm opacity-90">
                   Zühlke Story Estimation Tool
