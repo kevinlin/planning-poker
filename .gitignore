@@ -32,3 +32,6 @@ next-env.d.ts
 # Development session storage
 .sessions.json
 /data/
+
+# Temporary API backup during static builds
+/temp-api-backup/
