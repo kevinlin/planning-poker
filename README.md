@@ -12,27 +12,46 @@ A real-time story estimation tool for agile teams using poker-style voting with 
   - 2 estimates = majority wins
   - 3+ estimates = discussion needed
 - **Session Expiration**: Sessions expire after 15 minutes of inactivity
+- **Persistent Storage**: File-based storage that survives server restarts
 - **Zühlke Branding**: Professional UI with Zühlke gradient colors
 
 ## Deployment
 
-### GitHub Pages (Static)
+### Railway (Recommended)
 
-This project is configured to deploy to GitHub Pages as a static site. The static version uses localStorage for session management.
+Railway is the recommended deployment platform for this full-stack Next.js application with persistent storage.
 
-**Live Demo**: [https://kevinlin.github.io/planning-poker](https://kevinlin.github.io/planning-poker)
+#### Quick Deploy to Railway
 
-#### Setup GitHub Pages Deployment
+1. **Fork this repository** to your GitHub account
 
-1. **Enable GitHub Pages** in your repository settings:
-   - Go to Settings → Pages
-   - Source: GitHub Actions
-   - Save the configuration
+2. **Connect to Railway**:
+   - Go to [Railway](https://railway.app)
+   - Click "Deploy from GitHub repo"
+   - Select your forked repository
+   - Railway will automatically detect it's a Next.js app
 
-2. **Push to main/master branch** - the GitHub Action will automatically:
-   - Build the Next.js app with static export
-   - Deploy to GitHub Pages
-   - Make it available at `https://[username].github.io/planning-poker`
+3. **Configure Environment Variables** (optional):
+   - `DATA_DIR`: Custom data directory path (defaults to `/app/data`)
+   - `PORT`: Port number (defaults to 3000)
+
+4. **Deploy**: Railway will automatically build and deploy your app
+
+#### Manual Railway Setup
+
+```bash
+# Install Railway CLI
+npm install -g @railway/cli
+
+# Login to Railway
+railway login
+
+# Initialize project
+railway init
+
+# Deploy
+railway up
+```
 
 ### Local Development
 
@@ -50,16 +69,40 @@ npm run build
 npm start
 ```
 
+### Other Deployment Options
+
+#### Render
+1. Connect your GitHub repository to Render
+2. Choose "Web Service"
+3. Set build command: `npm run build`
+4. Set start command: `npm start`
+5. Add environment variables as needed
+
+#### DigitalOcean App Platform
+1. Create a new app from your GitHub repository
+2. DigitalOcean will auto-detect the Next.js configuration
+3. Configure environment variables in the app settings
+4. Deploy
+
+#### Docker Deployment
+```bash
+# Build the Docker image
+docker build -t planning-poker .
+
+# Run the container
+docker run -p 3000:3000 -v $(pwd)/data:/app/data planning-poker
+```
+
 ## Architecture
 
-### Static vs Dynamic Deployment
+### Backend Storage
 
-The application supports two deployment modes:
-
-1. **Static (GitHub Pages)**: Uses localStorage for session management
-2. **Dynamic (Server)**: Uses file-based persistent storage with API routes
-
-The deployment mode is automatically detected based on environment variables.
+The application uses a file-based persistent storage system that:
+- Stores sessions in JSON format
+- Automatically cleans up expired sessions every 5 minutes
+- Supports custom data directory via `DATA_DIR` environment variable
+- Includes automatic date serialization/deserialization
+- Provides health check endpoint at `/api/health`
 
 ### Technology Stack
 

@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { Session } from './types';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+// Support both local development and production environments
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 
 // Ensure data directory exists
@@ -86,7 +87,9 @@ class PersistentStorage {
     }, 5 * 60 * 1000);
 
     // Initial cleanup
-    this.cleanupExpiredSessions();
+    setTimeout(() => {
+      this.cleanupExpiredSessions();
+    }, 10000); // Wait 10 seconds after startup
   }
 
   private cleanupExpiredSessions(): void {

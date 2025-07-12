@@ -33,5 +33,5 @@ next-env.d.ts
 .sessions.json
 /data/
 
-# Temporary API backup during static builds
-/temp-api-backup/
+# Docker
+.dockerignore
