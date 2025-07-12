@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { StagewiseToolbar } from "@stagewise/toolbar-next";
+import ReactPlugin from "@stagewise-plugins/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -52,6 +54,7 @@ export default function RootLayout({
             </div>
           </footer>
         </div>
+        <StagewiseToolbar config={{ plugins: [ReactPlugin] }} />
       </body>
     </html>
   );
