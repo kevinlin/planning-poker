@@ -1,41 +1,58 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { cn } from "@/lib/utils"
-import { Toaster } from "@/components/ui/toaster"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Poker Estimation App",
-  description: "Real-time story estimation for agile teams.",
-    generator: 'v0.dev'
-}
+  title: "Poker Estimation - Zühlke",
+  description: "Real-time story estimation using poker-style voting",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "bg-gray-50 min-h-screen flex flex-col")}>
-        <header className="bg-header-gradient text-white shadow-md">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <h1 className="text-2xl font-bold">Zühlke Poker</h1>
+      <body className={inter.className} suppressHydrationWarning={true}>
+        <div className="min-h-screen bg-gray-50">
+          <header className="zuhlke-gradient text-white shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <div className="flex items-center">
+                  <img
+                    src="/logo.svg"
+                    alt="Poker Estimation Logo"
+                    className="h-8 mr-3"
+                  />
+                  <h1 className="text-xl font-bold">Poker Estimation</h1>
+                </div>
+                <div className="text-sm opacity-90">
+                  Zühlke Story Estimation Tool
+                </div>
+              </div>
             </div>
-          </div>
-        </header>
-        <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
-        <footer className="bg-footer text-white py-4">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-            &copy; 2025 Poker Estimation App. All rights reserved.
-          </div>
-        </footer>
-        <Toaster />
+          </header>
+          
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </main>
+          
+          <footer className="bg-gray-600 text-white mt-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="text-center text-sm opacity-90">
+                © 2025 Zühlke Engineering. Built for agile teams.
+              </div>
+            </div>
+          </footer>
+        </div>
       </body>
     </html>
-  )
-}
+  );
+} 
