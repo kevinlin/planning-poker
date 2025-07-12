@@ -45,7 +45,8 @@ A lightweight, real-time web app for story estimation using poker-style voting. 
 - Anyone can join any time during a round and see current state.
 
 ### 1.5. Session Lifecycle
-- **Ephemeral**: no database persistence.
+- **Persistent**: sessions survive server restarts and are stored in local files.
+- **Automatic cleanup**: expired sessions are cleaned up every 5 minutes.
 - Ends if:
   - All participants leave.
   - A vote is finalized.
@@ -101,15 +102,18 @@ A lightweight, real-time web app for story estimation using poker-style voting. 
 - **Single server** deployable on Vercel, Railway, or Azure App Service
 - WebSocket enabled
 - SSL via platform
-- No persistent volume needed
+- **File system access**: requires persistent file storage for session data
 
 ---
 
 ## 4. 🔐 Data Handling
 
-- **No persistence**: All session and user data are stored in-memory.
-- No personal data collection.
-- Session memory auto-clears after:
+- **File-based persistence**: Session and user data are stored in local JSON files to survive server restarts.
+- **Automatic cleanup**: Sessions are automatically cleaned up after 15 minutes of inactivity.
+- **No personal data collection**: Only session-related data (names, votes, timestamps) is stored.
+- **Local storage**: Data is stored in `/data/sessions.json` file on the server.
+- **Backup-friendly**: Simple JSON format allows easy backup and migration.
+- Session data auto-clears after:
   - 15 minutes of inactivity
   - Everyone leaves
 

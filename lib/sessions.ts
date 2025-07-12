@@ -1,11 +1,8 @@
 import { Session, Participant, Vote, SessionSummary, FIBONACCI_SCALE } from './types';
 import { generateSessionCode, generateId, isParticipantActive, isSessionExpired } from './utils';
+import { persistentStorage } from './storage';
 
-// In-memory storage with logging
-const sessions = new Map<string, Session>();
-const sessionsByCode = new Map<string, string>(); // code -> sessionId
-
-console.log('Session storage initialized');
+console.log('Session storage initialized with persistent storage');
 
 export class SessionManager {
   static createSession(jiraKey: string, title: string): Session {
@@ -13,7 +10,7 @@ export class SessionManager {
     let code = generateSessionCode();
     
     // Ensure unique code
-    while (sessionsByCode.has(code)) {
+    while (persistentStorage.sessionExists(code)) {
       code = generateSessionCode();
     }
     
@@ -29,27 +26,19 @@ export class SessionManager {
       lastActivity: new Date(),
     };
     
-    sessions.set(id, session);
-    sessionsByCode.set(code, id);
+    persistentStorage.saveSession(session);
     
-    console.log(`Created session ${code} (${id}). Total sessions: ${sessions.size}`);
+    console.log(`Created session ${code} (${id}). Total sessions: ${persistentStorage.getSessionCount()}`);
     
     return session;
   }
 
   static getSession(code: string): Session | null {
-    console.log(`Looking for session ${code}. Total sessions: ${sessions.size}`);
-    console.log('Available codes:', Array.from(sessionsByCode.keys()));
+    console.log(`Looking for session ${code}. Total sessions: ${persistentStorage.getSessionCount()}`);
     
-    const sessionId = sessionsByCode.get(code);
-    if (!sessionId) {
-      console.log(`Session code ${code} not found in sessionsByCode`);
-      return null;
-    }
-    
-    const session = sessions.get(sessionId);
+    const session = persistentStorage.getSession(code);
     if (!session) {
-      console.log(`Session ${sessionId} not found in sessions map`);
+      console.log(`Session code ${code} not found`);
       return null;
     }
     
@@ -65,11 +54,12 @@ export class SessionManager {
   }
 
   static getAllSessions(): SessionSummary[] {
-    console.log(`Getting all sessions. Total: ${sessions.size}`);
+    console.log(`Getting all sessions. Total: ${persistentStorage.getSessionCount()}`);
     
     const activeSessions: SessionSummary[] = [];
+    const allSessions = persistentStorage.getAllSessions();
     
-    for (const session of sessions.values()) {
+    for (const session of allSessions) {
       if (isSessionExpired(session.lastActivity)) {
         console.log(`Session ${session.code} expired, deleting`);
         this.deleteSession(session.code);
@@ -82,7 +72,7 @@ export class SessionManager {
         jiraKey: session.jiraKey,
         title: session.title,
         status: session.status,
-        participantCount: session.participants.filter(p => isParticipantActive(p.lastActivity)).length,
+        participantCount: session.participants.filter((p: Participant) => isParticipantActive(p.lastActivity)).length,
         finalEstimate: session.finalEstimate,
         createdAt: session.createdAt,
       });
@@ -291,25 +281,22 @@ export class SessionManager {
 
   private static updateSessionActivity(session: Session): void {
     session.lastActivity = new Date();
+    persistentStorage.saveSession(session);
   }
 
   private static deleteSession(code: string): void {
-    const sessionId = sessionsByCode.get(code);
-    if (sessionId) {
-      sessions.delete(sessionId);
-      sessionsByCode.delete(code);
-      console.log(`Deleted session ${code}`);
-    }
+    persistentStorage.deleteSession(code);
+    console.log(`Deleted session ${code}`);
   }
 }
 
 // Cleanup expired sessions periodically
 setInterval(() => {
   console.log('Running session cleanup...');
-  for (const [code, sessionId] of sessionsByCode.entries()) {
-    const session = sessions.get(sessionId);
-    if (session && isSessionExpired(session.lastActivity)) {
-      SessionManager.removeParticipant(code, ''); // This will trigger cleanup
+  const allSessions = persistentStorage.getAllSessions();
+  for (const session of allSessions) {
+    if (isSessionExpired(session.lastActivity)) {
+      SessionManager.removeParticipant(session.code, ''); // This will trigger cleanup
     }
   }
 }, 60000); // Check every minute 

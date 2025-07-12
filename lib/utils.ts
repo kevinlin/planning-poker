@@ -18,9 +18,10 @@ export function generateId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 
-export function formatTimeAgo(date: Date): string {
+export function formatTimeAgo(date: Date | string): string {
   const now = new Date();
-  const diff = now.getTime() - date.getTime();
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const diff = now.getTime() - dateObj.getTime();
   const minutes = Math.floor(diff / (1000 * 60));
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -32,7 +33,7 @@ export function formatTimeAgo(date: Date): string {
 }
 
 // Safe time formatting for SSR - returns static text initially
-export function formatTimeAgoSafe(date: Date): string {
+export function formatTimeAgoSafe(date: Date | string): string {
   // Return a static placeholder for SSR
   if (typeof window === 'undefined') {
     return 'recently';
@@ -40,14 +41,16 @@ export function formatTimeAgoSafe(date: Date): string {
   return formatTimeAgo(date);
 }
 
-export function isParticipantActive(lastActivity: Date): boolean {
+export function isParticipantActive(lastActivity: Date | string): boolean {
   const now = new Date();
-  const diff = now.getTime() - lastActivity.getTime();
-  return diff < 30 * 1000; // 30 seconds
+  const dateObj = typeof lastActivity === 'string' ? new Date(lastActivity) : lastActivity;
+  const diff = now.getTime() - dateObj.getTime();
+  return diff < 60 * 1000; // 60 seconds
 }
 
-export function isSessionExpired(lastActivity: Date): boolean {
+export function isSessionExpired(lastActivity: Date | string): boolean {
   const now = new Date();
-  const diff = now.getTime() - lastActivity.getTime();
+  const dateObj = typeof lastActivity === 'string' ? new Date(lastActivity) : lastActivity;
+  const diff = now.getTime() - dateObj.getTime();
   return diff > 15 * 60 * 1000; // 15 minutes
 } 
