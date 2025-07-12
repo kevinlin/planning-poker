@@ -10,15 +10,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // Optimize for Vercel deployment
-  experimental: {
-    serverComponentsExternalPackages: ['fs'],
-  },
-  // Ensure API routes work correctly
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-  },
+  serverExternalPackages: ['fs'],
 }
 
 export default nextConfig
