@@ -17,41 +17,42 @@ A real-time story estimation tool for agile teams using poker-style voting with 
 
 ## Deployment
 
-### Railway (Recommended)
+### Vercel (Recommended)
 
-Railway is the recommended deployment platform for this full-stack Next.js application with persistent storage.
+Vercel is the recommended deployment platform for this full-stack Next.js application.
 
-#### Quick Deploy to Railway
+#### Quick Deploy to Vercel
 
 1. **Fork this repository** to your GitHub account
 
-2. **Connect to Railway**:
-   - Go to [Railway](https://railway.app)
-   - Click "Deploy from GitHub repo"
-   - Select your forked repository
-   - Railway will automatically detect it's a Next.js app
+2. **Connect to Vercel**:
+   - Go to [Vercel](https://vercel.com)
+   - Click "New Project"
+   - Import your forked repository
+   - Vercel will automatically detect it's a Next.js app
 
 3. **Configure Environment Variables** (optional):
-   - `DATA_DIR`: Custom data directory path (defaults to `/app/data`)
-   - `PORT`: Port number (defaults to 3000)
+   - `DATA_DIR`: Custom data directory path (defaults to `/tmp/data` on Vercel)
 
-4. **Deploy**: Railway will automatically build and deploy your app
+4. **Deploy**: Vercel will automatically build and deploy your app
 
-#### Manual Railway Setup
+#### Manual Vercel Setup
 
 ```bash
-# Install Railway CLI
-npm install -g @railway/cli
+# Install Vercel CLI
+npm install -g vercel
 
-# Login to Railway
-railway login
-
-# Initialize project
-railway init
+# Login to Vercel
+vercel login
 
 # Deploy
-railway up
+vercel
+
+# For production deployment
+vercel --prod
 ```
+
+**Note**: On Vercel, session data is stored in `/tmp` directory and will be ephemeral (resets on function cold starts). For persistent storage, consider integrating with a database like Vercel KV or PostgreSQL.
 
 ### Local Development
 
@@ -84,14 +85,12 @@ npm start
 3. Configure environment variables in the app settings
 4. Deploy
 
-#### Docker Deployment
-```bash
-# Build the Docker image
-docker build -t planning-poker .
-
-# Run the container
-docker run -p 3000:3000 -v $(pwd)/data:/app/data planning-poker
-```
+#### Netlify
+1. Connect your GitHub repository to Netlify
+2. Set build command: `npm run build`
+3. Set publish directory: `.next`
+4. Enable Next.js runtime for API routes
+5. Configure environment variables as needed
 
 ## Architecture
 

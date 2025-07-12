@@ -3,7 +3,8 @@ import path from 'path';
 import { Session } from './types';
 
 // Support both local development and production environments
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+// In Vercel, use /tmp directory for temporary file storage
+const DATA_DIR = process.env.DATA_DIR || (process.env.VERCEL ? '/tmp/data' : path.join(process.cwd(), 'data'));
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 
 // Ensure data directory exists
