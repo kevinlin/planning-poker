@@ -59,4 +59,14 @@ export interface SessionState {
   currentParticipant?: Participant;
   hasVoted: boolean;
   canReveal: boolean;
-} 
+}
+
+// Google Analytics gtag types
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+    dataLayer: any[];
+  }
+}
+
+export {}; 

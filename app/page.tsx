@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ClientOnly } from '@/components/client-only';
 import { SessionSummary } from '@/lib/types';
 import { formatTimeAgo } from '@/lib/utils';
+import { trackEvent } from '@/components/google-analytics';
 import { Plus, Copy, ExternalLink, Trash2 } from 'lucide-react';
 
 export default function HomePage() {
@@ -27,6 +28,14 @@ export default function HomePage() {
     fetchSessions();
     // Poll for updates every 10 seconds
     const interval = setInterval(fetchSessions, 10000);
+    
+    // Track page view
+    trackEvent({
+      action: 'page_view',
+      category: 'navigation',
+      label: 'home',
+    });
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -68,6 +77,14 @@ export default function HomePage() {
 
       if (response.ok) {
         const session = await response.json();
+        
+        // Track session creation
+        trackEvent({
+          action: 'create_session',
+          category: 'session',
+          label: session.code,
+        });
+        
         router.push(`/session/${session.code}`);
       } else {
         const errorData = await response.json();
@@ -84,7 +101,13 @@ export default function HomePage() {
   const copySessionCode = (code: string) => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(code);
-      // You could add a toast notification here
+      
+      // Track code copy action
+      trackEvent({
+        action: 'copy_session_code',
+        category: 'session',
+        label: code,
+      });
     }
   };
 

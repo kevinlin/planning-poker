@@ -12,6 +12,7 @@ import { ParticipantList } from '@/components/participant-list';
 import { ClientOnly } from '@/components/client-only';
 import { Session, Participant, FIBONACCI_SCALE, FibonacciValue } from '@/lib/types';
 import { isParticipantActive } from '@/lib/utils';
+import { trackEvent } from '@/components/google-analytics';
 import { ArrowLeft, Eye, RotateCcw, Check, Copy } from 'lucide-react';
 
 interface SessionPageProps {
@@ -34,6 +35,14 @@ export default function SessionPage({ params }: SessionPageProps) {
     fetchSession();
     // Poll for updates every 2 seconds
     const interval = setInterval(fetchSession, 2000);
+    
+    // Track page view
+    trackEvent({
+      action: 'page_view',
+      category: 'navigation',
+      label: `session_${resolvedParams.code}`,
+    });
+    
     return () => clearInterval(interval);
   }, [resolvedParams.code]);
 
@@ -98,6 +107,13 @@ export default function SessionPage({ params }: SessionPageProps) {
         const data = await response.json();
         setCurrentParticipant(data.participant);
         setSession(data.session);
+        
+        // Track session join
+        trackEvent({
+          action: 'join_session',
+          category: 'session',
+          label: resolvedParams.code,
+        });
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to join session');
@@ -131,6 +147,14 @@ export default function SessionPage({ params }: SessionPageProps) {
       if (response.ok) {
         const data = await response.json();
         setSession(data);
+        
+        // Track vote submission
+        trackEvent({
+          action: 'submit_vote',
+          category: 'voting',
+          label: `${resolvedParams.code}_${value}`,
+          value: value,
+        });
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to submit vote');
@@ -161,6 +185,13 @@ export default function SessionPage({ params }: SessionPageProps) {
       if (response.ok) {
         const sessionData = await response.json();
         setSession(sessionData);
+        
+        // Track session actions
+        trackEvent({
+          action: `session_${action}`,
+          category: 'session',
+          label: resolvedParams.code,
+        });
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to perform action');
@@ -193,6 +224,13 @@ export default function SessionPage({ params }: SessionPageProps) {
   const copySessionCode = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(resolvedParams.code);
+      
+      // Track copy action
+      trackEvent({
+        action: 'copy_session_code',
+        category: 'interaction',
+        label: resolvedParams.code,
+      });
     }
   };
 
